@@ -1,11 +1,11 @@
 ﻿using Dapper;
+using INVESTIMENTO.RENDAFIXA.DOMAIN.Financeiro;
 using INVESTIMENTO.RENDAFIXA.DOMAIN.Financeiro.BancoDados.Manipula;
-using INVESTIMENTO.RENDAFIXA.TEST.DBRENDAFIXAMODEL;
 using System.Data;
 
 namespace INVESTIMENTO.RENDAFIXA.INFRASTRUCTURE.Financeiro.BancoDados.Manipula;
 
-public class InvestimentoServicoDeDados(IDbConnection dbConnection) : IInvestimentoServicoDeDados
+public class ServicoDeInvestimento(IDbConnection dbConnection) : IServicoDeInvestimento
 {
     private readonly IDbConnection _dbConnection = dbConnection;
 
@@ -19,12 +19,18 @@ public class InvestimentoServicoDeDados(IDbConnection dbConnection) : IInvestime
             NmValorinicial = investimento.NmValorInicial,
             NmValorfinal = investimento.NmValorFinal,
             NmValorimposto = investimento.NmValorImposto,
-            NmTaxarendimento = investimento.NmTaxaRendimento,
-            NmTaxaadiional = investimento.NmTaxaAdicional,
+            NmTaxaRendimento = investimento.NmTaxaRendimento,
+            NmTaxaAdicional = investimento.NmTaxaAdicional,
             DtInicial = investimento.DtInicial,
             DtFinal = investimento.DtFinal,
             IdIndexador = investimento.IdIndexador,
             BoLiquidado = false,
+            IdMovimentacao = investimento.Movimentacao.IdMovimentacao,
+            DtMovimentacao = investimento.Movimentacao.DtMovimentacao,
+            NmValorBrutoTotal = investimento.Movimentacao.NmValorBrutoTotal, 
+            NmValorLiquidoTotal = investimento.Movimentacao.NmValorLiquidoTotal,
+            NmValorBruto = investimento.Movimentacao.NmValorBruto,
+            NmValorLiquido = investimento.Movimentacao.NmValorLiquido,
             BoIsentoimposto = false,
             TxUsuario = investimento.TxUsuario
         };
@@ -39,7 +45,7 @@ public class InvestimentoServicoDeDados(IDbConnection dbConnection) : IInvestime
             [NM_VALORFINAL],
             [NM_VALORIMPOSTO],
             [NM_TAXARENDIMENTO],
-            [NM_TAXAADIIONAL],
+            [NM_TAXAADICIONAL],
             [DT_INICIAL],
             [DT_FINAL],
             [ID_INDEXADOR],
@@ -55,15 +61,34 @@ public class InvestimentoServicoDeDados(IDbConnection dbConnection) : IInvestime
             @NmValorinicial,
             @NmValorfinal,
             @NmValorimposto,
-            @NmTaxarendimento,
-            @NmTaxaadicional,
+            @NmTaxaRendimento,
+            @NmTaxaAdicional,
             @DtInicial,
             @DtFinal,
             @IdIndexador,
             @BoLiquidado,
             @BoIsentoimposto,
             @TxUsuario
-        )";
+        )
+        
+        INSERT INTO[dbo].[MOVIMENTACAO]
+        ([ID_INVESTIMENTO]
+           , [ID_MOVIMENTACAO]
+           , [DT_MOVIMENTACAO]
+           , [NM_VALORBRUTOTOTAL]
+           , [NM_VALORLIQUIDOTOTAL]
+           , [NM_VALORBRUTO]
+           , [NM_VALORLIQUIDO]
+           , [TX_USUARIO])
+     VALUES
+           (@IdInvestimento
+           ,@IdMovimentacao
+           ,@DtMovimentacao
+           ,@NmValorBrutoTotal
+           ,@NmValorLiquidoTotal
+           ,@NmValorBruto
+           ,@NmValorLiquido
+           ,@TxUsuario)";
 
         return _dbConnection.ExecuteAsync(sql, listaDeParametro);
     }

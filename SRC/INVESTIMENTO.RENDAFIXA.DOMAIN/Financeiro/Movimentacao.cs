@@ -1,33 +1,31 @@
-﻿using System;
-using System.Collections.Generic;
+﻿namespace INVESTIMENTO.RENDAFIXA.DOMAIN.Financeiro;
 
-namespace INVESTIMENTO.RENDAFIXA.TEST.DBRENDAFIXAMODEL;
-
-public partial class Movimentacao
+public class Movimentacao
 {
+    private const int PrimeiroRegistroMovimentacao = 1;
+    public Movimentacao(Investimento investimento)
+    {
+        IdInvestimento = investimento.IdInvestimento;
+        IdMovimentacao = PrimeiroRegistroMovimentacao;
+        DtMovimentacao = DateTime.Today;
+        NmValorBrutoTotal = investimento.NmValorInicial;
+        NmValorLiquidoTotal = NmValorBrutoTotal;
+        NmValorBruto = decimal.Zero;
+        NmValorLiquido = decimal.Zero;
+        TxUsuario = investimento.TxUsuario;
+        DtCriacao = DateTime.Now;
+    }
+
+    public MovimentacaoImposto? MovimentacaoImposto { get; } = null;
     public Guid IdInvestimento { get; }
-
     public short IdMovimentacao { get; }
-
-    public DateOnly DtMovimentacao { get; }
-
-    public decimal NmValorbrutototal { get; }
-
-    public decimal NmValorliquidototal { get; }
-
-    public decimal NmValorbruto { get; }
-
-    public decimal NmValorliquido { get; }
-
-    public string TxUsuario { get; } = null!;
-
+    public DateTime DtMovimentacao { get; }
+    public decimal NmValorBrutoTotal { get; }
+    public decimal NmValorLiquidoTotal { get; }
+    public decimal NmValorBruto { get; }
+    public decimal NmValorLiquido { get; }
+    public string TxUsuario { get; } = string.Empty;
     public DateTime DtCriacao { get; }
-
-    public string? TxUsuarioatualizacao { get; }
-
+    public string? TxUsuarioAtualizacao { get; }
     public DateTime? DtAtualizacao { get; }
-
-    public virtual Investimento IdInvestimentoNavigation { get; } = null!;
-
-    public virtual ICollection<Movimentacaoimposto> Movimentacaoimpostos { get; } = new List<Movimentacaoimposto>();
 }

@@ -62,14 +62,15 @@
     <Folder Include="TABLE\ESTRUTURA" />
     <Folder Include="TABLE\ESTRUTURA\CREATE" />
     <Folder Include="TABLE\ESTRUTURA\DROP" />
-    <Folder Include="TABLE\DADO\CREATE" />
+    <Folder Include="TABLE\DADO\INSERT" />
     <Folder Include="TABLE\DADO\DROP" />
   </ItemGroup>
   <ItemGroup>
     <None Include="CRIA_BASEDADOS.sql" />
-    <None Include="TABLE\DADO\CREATE\INSERE_IMPOSTO.sql" />
-    <None Include="TABLE\DADO\CREATE\INSERE_CONFIGURACAOIMPOSTO.sql" />
-    <None Include="TABLE\DADO\CREATE\INSERE_INDEXADOR.sql" />
+    <None Include="TABLE\DADO\INSERT\INSERE_IMPOSTO.sql" />
+    <None Include="TABLE\DADO\INSERT\INSERE_FINANCEIRO.sql" />
+    <None Include="TABLE\DADO\INSERT\INSERE_INDEXADOR.sql" />
+    <None Include="TABLE\DADO\DROP\DROP_IMPOSTO.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="TABLE\ESTRUTURA\CREATE\1_IMPOSTO.sql" />
@@ -88,5 +89,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="TABLE\ESTRUTURA\DROP\3_IMPOSTO.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="TABLE\DADO\DROP\DROP_INDEXADOR.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="TABLE\DADO\DROP\DROP_FINANCEIRO.sql" />
   </ItemGroup>
 </Project>

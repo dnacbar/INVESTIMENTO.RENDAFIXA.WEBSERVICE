@@ -1,4 +1,4 @@
-﻿namespace INVESTIMENTO.RENDAFIXA.TEST.DBRENDAFIXAMODEL;
+﻿namespace INVESTIMENTO.RENDAFIXA.DOMAIN.Financeiro;
 
 public partial class Resgate
 {

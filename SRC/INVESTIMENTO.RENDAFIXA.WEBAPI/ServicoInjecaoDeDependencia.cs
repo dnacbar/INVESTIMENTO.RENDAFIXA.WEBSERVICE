@@ -23,6 +23,6 @@ public static class ServicoInjecaoDeDependencia
 
     private static void DatabaseService(IServiceCollection services)
     {
-        services.AddSingleton<IInvestimentoServicoDeDados, InvestimentoServicoDeDados>();
+        services.AddSingleton<IServicoDeInvestimento, ServicoDeInvestimento>();
     }
 }

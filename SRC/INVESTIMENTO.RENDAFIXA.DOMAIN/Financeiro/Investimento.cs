@@ -1,19 +1,30 @@
-﻿namespace INVESTIMENTO.RENDAFIXA.TEST.DBRENDAFIXAMODEL;
+﻿using INVESTIMENTO.RENDAFIXA.DOMAIN.Indice.Enum;
+
+namespace INVESTIMENTO.RENDAFIXA.DOMAIN.Financeiro;
 
 public class Investimento
 {
-    public Investimento(Guid idInvestidor, string txDocumentoFederal, decimal nmValorInicial,
-        decimal nmTaxarendimento, decimal nmTaxaAdicional, Guid idIndexador, bool boIsentoImposto)
+    public Investimento(Guid idInvestidor, string txDocumentoFederal, decimal nmValorInicial, decimal nmTaxarendimento,
+        decimal nmTaxaAdicional, DateTime dtInicial, DateTime dtFinal, byte idIndexador, bool boIsentoImposto, string txUsuario)
     {
-        IdInvestimento = new Guid();
+        IdInvestimento = Guid.NewGuid();
         IdInvestidor = idInvestidor;
         TxDocumentoFederal = txDocumentoFederal;
         NmValorInicial = nmValorInicial;
+        NmValorFinal = NmValorInicial;
         NmTaxaRendimento = nmTaxarendimento;
         NmTaxaAdicional = nmTaxaAdicional;
-        IdIndexador = idIndexador;
+        DtInicial = dtInicial;
+        DtFinal = dtFinal;
+        IdIndexador = (EnumIndexador)idIndexador;
         BoIsentoImposto = boIsentoImposto;
+
+        TxUsuario = txUsuario;
+
+        Movimentacao = new Movimentacao(this);
     }
+
+    public virtual Movimentacao Movimentacao { get; }
 
     public Guid IdInvestimento { get; }
     public Guid IdInvestidor { get; }
@@ -25,24 +36,28 @@ public class Investimento
     public decimal NmTaxaAdicional { get; private set; }
     public DateTime DtInicial { get; }
     public DateTime DtFinal { get; }
-    public Guid IdIndexador
+    public EnumIndexador IdIndexador
     {
         get
         {
-            NmTaxaAdicional = _idIndexador == Guid.Empty ? decimal.Zero : NmTaxaAdicional;
+            NmTaxaAdicional = _idIndexador == EnumIndexador.Pre ? decimal.Zero : NmTaxaAdicional;
             return _idIndexador;
         }
         private set { _idIndexador = value; }
     }
     public bool BoLiquidado { get; }
     public bool BoIsentoImposto { get; }
-    public string TxUsuario { get; } = string.Empty;
+    public string TxUsuario
+    {
+        get { return string.IsNullOrEmpty(_txUsuario) ? "DN" : _txUsuario; }
+        private set { _txUsuario = value; }
+    }
     public DateTime DtCriacao { get; }
     public string? TxUsuarioAtualizacao { get; }
     public DateTime? DtAtualizacao { get; }
 
-    public bool VerificaSeEhPreFixado() => IdIndexador == Guid.Empty;
+    public bool VerificaSeEhPreFixado() => IdIndexador == EnumIndexador.Pre;
 
-
-    private Guid _idIndexador;
+    private string _txUsuario;
+    private EnumIndexador _idIndexador;
 }

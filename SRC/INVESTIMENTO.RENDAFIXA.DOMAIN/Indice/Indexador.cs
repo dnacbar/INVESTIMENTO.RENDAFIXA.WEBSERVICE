@@ -1,8 +1,8 @@
-﻿namespace INVESTIMENTO.RENDAFIXA.TEST.DBRENDAFIXAMODEL;
+﻿namespace INVESTIMENTO.RENDAFIXA.DOMAIN;
 
 public partial class Indexador
 {
-    public Guid IdIndexador { get; }
+    public byte IdIndexador { get; }
     public string TxNome { get; } = null!;
     public string? TxDescricao { get; }
     public decimal NmRendimento { get; }

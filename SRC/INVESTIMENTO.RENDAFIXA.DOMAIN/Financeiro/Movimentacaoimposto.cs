@@ -1,19 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
+﻿namespace INVESTIMENTO.RENDAFIXA.DOMAIN.Financeiro;
 
-namespace INVESTIMENTO.RENDAFIXA.TEST.DBRENDAFIXAMODEL;
-
-public partial class Movimentacaoimposto
+public class MovimentacaoImposto
 {
+    public MovimentacaoImposto(Guid idInvestimento, short idMovimentacao, short idImposto, decimal nmValorimposto)
+    {
+        IdInvestimento = idInvestimento;
+        IdMovimentacao = idMovimentacao;
+        IdImposto = idImposto;
+        NmValorimposto = nmValorimposto;
+    }
+
     public Guid IdInvestimento { get; }
-
     public short IdMovimentacao { get; }
-
     public short IdImposto { get; }
-
     public decimal NmValorimposto { get; }
-
-    public virtual Imposto IdImpostoNavigation { get; } = null!;
-
-    public virtual Movimentacao Movimentacao { get; } = null!;
 }
