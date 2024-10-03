@@ -5,7 +5,7 @@ using System.Data;
 
 namespace INVESTIMENTO.RENDAFIXA.INFRASTRUCTURE.Financeiro.BancoDados.Manipula;
 
-public class ServicoDeInvestimento(IDbConnection dbConnection) : IServicoDeInvestimento
+public class ServicoQueManipulaInvestimento(IDbConnection dbConnection) : IServicoQueManipulaInvestimento
 {
     private readonly IDbConnection _dbConnection = dbConnection;
 
@@ -13,29 +13,31 @@ public class ServicoDeInvestimento(IDbConnection dbConnection) : IServicoDeInves
     {
         var listaDeParametro = new
         {
-            IdInvestimento = investimento.IdInvestimento,
-            IdInvestidor = investimento.IdInvestidor,
-            TxDocumentofederal = investimento.TxDocumentoFederal,
-            NmValorinicial = investimento.NmValorInicial,
-            NmValorfinal = investimento.NmValorFinal,
-            NmValorimposto = investimento.NmValorImposto,
-            NmTaxaRendimento = investimento.NmTaxaRendimento,
-            NmTaxaAdicional = investimento.NmTaxaAdicional,
-            DtInicial = investimento.DtInicial,
-            DtFinal = investimento.DtFinal,
-            IdIndexador = investimento.IdIndexador,
+            investimento.IdInvestimento,
+            investimento.IdInvestidor,
+            investimento.TxDocumentoFederal,
+            investimento.NmValorInicial,
+            investimento.NmValorFinal,
+            investimento.NmValorImposto,
+            investimento.NmTaxaRendimento,
+            investimento.NmTaxaAdicional,
+            investimento.DtInicial,
+            investimento.DtFinal,
+            investimento.IdIndexador,
             BoLiquidado = false,
-            IdMovimentacao = investimento.Movimentacao.IdMovimentacao,
-            DtMovimentacao = investimento.Movimentacao.DtMovimentacao,
-            NmValorBrutoTotal = investimento.Movimentacao.NmValorBrutoTotal, 
-            NmValorLiquidoTotal = investimento.Movimentacao.NmValorLiquidoTotal,
-            NmValorBruto = investimento.Movimentacao.NmValorBruto,
-            NmValorLiquido = investimento.Movimentacao.NmValorLiquido,
+            investimento.Movimentacao.IdMovimentacao,
+            investimento.Movimentacao.DtMovimentacao,
+            investimento.Movimentacao.NmValorBrutoTotal,
+            investimento.Movimentacao.NmValorLiquidoTotal,
+            investimento.Movimentacao.NmValorBruto,
+            investimento.Movimentacao.NmValorLiquido,
             BoIsentoimposto = false,
-            TxUsuario = investimento.TxUsuario
+            investimento.TxUsuario
         };
 
-        var sql = @$"
+        var sql = @"
+        USE [DBRENDAFIXA]
+
         INSERT INTO [dbo].[INVESTIMENTO]
         (
             [ID_INVESTIMENTO],
@@ -57,10 +59,10 @@ public class ServicoDeInvestimento(IDbConnection dbConnection) : IServicoDeInves
         (
             @IdInvestimento,
             @IdInvestidor,
-            @TxDocumentofederal,
-            @NmValorinicial,
-            @NmValorfinal,
-            @NmValorimposto,
+            @TxDocumentoFederal,
+            @NmValorInicial,
+            @NmValorFinal,
+            @NmValorImposto,
             @NmTaxaRendimento,
             @NmTaxaAdicional,
             @DtInicial,

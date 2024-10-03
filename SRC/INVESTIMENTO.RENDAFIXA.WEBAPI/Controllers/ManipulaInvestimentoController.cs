@@ -7,9 +7,9 @@ namespace INVESTIMENTO.RENDAFIXA.WEBAPI.Controllers;
 
 [ApiController]
 [Route("[controller]/[action]")]
-public class ManipulaInvestimentoController(IServicoDeInvestimento investimentoServicoDeDados) : ControllerBase
+public class ManipulaInvestimentoController(IServicoQueManipulaInvestimento servicoQueManipulaInvestimento) : ControllerBase
 {
-    private readonly IServicoDeInvestimento _investimentoServicoDeDados = investimentoServicoDeDados;
+    private readonly IServicoQueManipulaInvestimento _servicoQueManipulaInvestimento = servicoQueManipulaInvestimento;
 
     [HttpPost(nameof(AdicionaInvestimento))]
     public async Task<IActionResult> AdicionaInvestimento(AdicionaInvestimentoSignature signature)
@@ -19,7 +19,7 @@ public class ManipulaInvestimentoController(IServicoDeInvestimento investimentoS
         var investimento = new Investimento(signature.Investidor, signature.DocumentoFederal, signature.ValorInicial, signature.TaxaRendimento, 
             signature.TaxaAdicional, signature.DataInicial, signature.DataFinal, signature.Indexador, signature.IsentoImposto, signature.Usuario);
 
-        await _investimentoServicoDeDados.Adiciona(investimento);
+        await _servicoQueManipulaInvestimento.Adiciona(investimento);
 
         return Ok(investimento.IdInvestimento);
     }

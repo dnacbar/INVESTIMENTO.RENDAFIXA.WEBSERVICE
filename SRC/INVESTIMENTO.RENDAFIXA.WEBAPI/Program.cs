@@ -1,9 +1,9 @@
+using DN.LOG.LIBRARY.MIDDLEWARE;
 using INVESTIMENTO.RENDAFIXA.WEBAPI;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 ServicoInjecaoDeDependencia.AddServiceCollection(builder);
 
 builder.Services.AddControllers();
@@ -18,6 +18,14 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+}
+else
+{
+    app.UseBadRequestExceptionMiddleware()
+       .UseBadGatewayExceptionMiddleware()
+       .UseNotFoundExceptionMiddleware()
+       .UseDataBaseExceptionMiddleware()
+       .UseFatalExceptionMiddleware();
 }
 
 //app.UseAuthorization();

@@ -1,9 +1,13 @@
-﻿using INVESTIMENTO.RENDAFIXA.DOMAIN.Indice.Enum;
+﻿using DN.LOG.LIBRARY.MODEL.EXCEPTION;
+using INVESTIMENTO.RENDAFIXA.DOMAIN.Indice.Enum;
 
 namespace INVESTIMENTO.RENDAFIXA.DOMAIN.Financeiro;
 
 public class Investimento
 {
+    private const byte TamanhoDocumentoPessoaJuridica = 14;
+    private const byte TamanhoDocumentoPessoaFisica = 11;
+
     public Investimento(Guid idInvestidor, string txDocumentoFederal, decimal nmValorInicial, decimal nmTaxarendimento,
         decimal nmTaxaAdicional, DateTime dtInicial, DateTime dtFinal, byte idIndexador, bool boIsentoImposto, string txUsuario)
     {
@@ -22,9 +26,37 @@ public class Investimento
         TxUsuario = txUsuario;
 
         Movimentacao = new Movimentacao(this);
+        BoLiquidado = Movimentacao.VerificaSeValorLiquidoTotalEstaZerado();
     }
 
-    public virtual Movimentacao Movimentacao { get; }
+    public Investimento(Guid idInvestimento, Guid idInvestidor, string txDocumentoFederal, decimal nmValorInicial, decimal nmValorFinal, decimal nmValorImposto,
+        decimal nmTaxaRendimento, decimal nmTaxaAdicional, DateTime dtInicial, DateTime dtFinal, byte idIndexador, bool boLiquidado, bool boIsentoImposto)
+    {
+        IdInvestimento = idInvestimento;
+        IdInvestidor = idInvestidor;
+        TxDocumentoFederal = txDocumentoFederal;
+        NmValorInicial = nmValorInicial;
+        NmValorFinal = nmValorFinal;
+        NmValorImposto = nmValorImposto;
+        NmTaxaRendimento = nmTaxaRendimento;
+        NmTaxaAdicional = nmTaxaAdicional;
+        DtInicial = dtInicial;
+        DtFinal = dtFinal;
+        IdIndexador = (EnumIndexador)idIndexador;
+        BoLiquidado = boLiquidado;
+        BoIsentoImposto = boIsentoImposto;
+
+        ValidaInvestimento();
+    }
+
+    public Investimento(Guid idInvestimento, Guid idInvestidor, string txDocumentoFederal)
+    {
+        IdInvestimento = idInvestimento;
+        IdInvestidor = idInvestidor;
+        TxDocumentoFederal = txDocumentoFederal;
+    }
+
+    public virtual Movimentacao Movimentacao { get; } = null!;
 
     public Guid IdInvestimento { get; }
     public Guid IdInvestidor { get; }
@@ -35,22 +67,32 @@ public class Investimento
     public decimal NmTaxaRendimento { get; }
     public decimal NmTaxaAdicional { get; private set; }
     public DateTime DtInicial { get; }
-    public DateTime DtFinal { get; }
+    public DateTime DtFinal
+    {
+        get
+        { return _dtFinal; }
+        set
+        {
+            _dtFinal = value;
+            BoLiquidado = DateTime.Today >= _dtFinal.Date;
+        }
+    }
     public EnumIndexador IdIndexador
     {
         get
+        { return _idIndexador; }
+        private set
         {
+            _idIndexador = value;
             NmTaxaAdicional = _idIndexador == EnumIndexador.Pre ? decimal.Zero : NmTaxaAdicional;
-            return _idIndexador;
         }
-        private set { _idIndexador = value; }
     }
-    public bool BoLiquidado { get; }
+    public bool BoLiquidado { get; private set; }
     public bool BoIsentoImposto { get; }
     public string TxUsuario
     {
-        get { return string.IsNullOrEmpty(_txUsuario) ? "DN" : _txUsuario; }
-        private set { _txUsuario = value; }
+        get { return _txUsuario; }
+        private set { _txUsuario = string.IsNullOrEmpty(value) ? "DN" : value; }
     }
     public DateTime DtCriacao { get; }
     public string? TxUsuarioAtualizacao { get; }
@@ -58,6 +100,46 @@ public class Investimento
 
     public bool VerificaSeEhPreFixado() => IdIndexador == EnumIndexador.Pre;
 
-    private string _txUsuario;
+    private void ValidaInvestimento()
+    {
+        if (!VerificaSeCodigoInvestimentoEstaPreenchido())
+            throw new BadRequestException($"Código investimento tem que ser preenchido! Código investimento:[{IdInvestimento}]");
+
+        if (!VerificaSeCodigoInvestidorEstaPreenchido())
+            throw new BadRequestException($"Código investidor tem que ser preenchido! Código investidor:[{IdInvestidor}]");
+
+        if (!VerificaSeDataInvestimentoEstaValida())
+            throw new BadRequestException($"Data inicial tem que ser maior ou igual a data de hoje e menor do que a data final! Data inicial:[{DtFinal}] Data final:[{DtInicial}]");
+
+        if (VerificaSeValorInicialFinalEstaNegativo())
+            throw new BadRequestException($"Valor inicial ou valor final que ser positivo! Valor inicial:[{NmValorInicial}] Valor final:[{NmValorFinal}]");
+
+        if (!VerificaSeValorInicialEhMenorOuIgualValorFinal())
+            throw new BadRequestException($"Valor inicial tem que ser menor ou igual ao valor final! Valor inicial:[{NmValorInicial}] Valor final:[{NmValorFinal}]");
+
+        if (VerificaSeValorImpostoEstaNegativo())
+            throw new BadRequestException($"Valor imposto que ser positivo! Valor imposto:[{NmValorImposto}]");
+
+        if (VerificaSeValorTaxaRendimentoEstaNegativaOuZerada())
+            throw new BadRequestException($"Valor taxa rendimento tem que ser maior que zero! Valor imposto:[{NmTaxaRendimento}]");
+
+        if (VerificaSeValorTaxaAdicionalEstaNegativaOuZerada())
+            throw new BadRequestException($"Valor taxa adicional tem que ser maior que zero! Valor imposto:[{NmTaxaAdicional}]");
+
+        if (!VerificaSeDocumentoEstaValido())
+            throw new BadRequestException($"Documento federal que ser uma numeração válida e tamanho valido! Documento federal:[{TxDocumentoFederal}]");
+    }
+    private bool VerificaSeCodigoInvestidorEstaPreenchido() => IdInvestidor != Guid.Empty;
+    private bool VerificaSeCodigoInvestimentoEstaPreenchido() => IdInvestimento != Guid.Empty;
+    private bool VerificaSeDataInvestimentoEstaValida() => DtInicial >= DateTime.Today && DtInicial < DtFinal;
+    private bool VerificaSeDocumentoEstaValido() => ulong.TryParse(TxDocumentoFederal, out _) && TxDocumentoFederal.Length == TamanhoDocumentoPessoaFisica || TxDocumentoFederal.Length == TamanhoDocumentoPessoaJuridica;
+    private bool VerificaSeValorImpostoEstaNegativo() => NmValorImposto < decimal.Zero;
+    private bool VerificaSeValorInicialEhMenorOuIgualValorFinal() => NmValorInicial <= NmValorFinal;
+    private bool VerificaSeValorInicialFinalEstaNegativo() => NmValorInicial < decimal.Zero || NmValorFinal < decimal.Zero;
+    private bool VerificaSeValorTaxaAdicionalEstaNegativaOuZerada() => NmTaxaAdicional <= decimal.Zero;
+    private bool VerificaSeValorTaxaRendimentoEstaNegativaOuZerada() => NmTaxaRendimento <= decimal.Zero;
+
+    private DateTime _dtFinal;
     private EnumIndexador _idIndexador;
+    private string _txUsuario = string.Empty;
 }

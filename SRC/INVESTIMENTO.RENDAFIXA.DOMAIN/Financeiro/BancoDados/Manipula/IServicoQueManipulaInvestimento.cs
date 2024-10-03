@@ -1,6 +1,6 @@
 ﻿namespace INVESTIMENTO.RENDAFIXA.DOMAIN.Financeiro.BancoDados.Manipula;
 
-public interface IServicoDeInvestimento
+public interface IServicoQueManipulaInvestimento
 {
     Task Adiciona(Investimento investimento);
 }
