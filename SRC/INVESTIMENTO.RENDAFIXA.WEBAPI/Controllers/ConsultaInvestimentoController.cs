@@ -11,11 +11,20 @@ public class ConsultaInvestimentoController(IServicoQueConsultaInvestimentoDaPes
 {
     private readonly IServicoQueConsultaInvestimentoDaPessoa _servicoQueConsultaInvestimentoDaPessoa = servicoQueConsultaInvestimentoDaPessoa;
 
-    [HttpPost(nameof(ConsultaInvestimentoDaPessoa))]
-    public async Task<IActionResult> ConsultaInvestimentoDaPessoa(ConsultaInvestimentoDaPessoaSignature signature)
+    [HttpPost]
+    public async Task<IActionResult> ConsultaInvestimentoDaPessoaQueNaoEstaBloqueado(ListaInvestimentoQueNaoEstaLiquidadoNemBloqueadoSignature signature)
+    {
+        var taskConsultaInvestimentoQueNaoEstaBloqueado = _servicoQueConsultaInvestimentoDaPessoa
+            .ConsultaInvestimentoQueNaoEstaBloqueado(new Investimento(signature.Investimento, signature.Investidor, signature.DocumentoFederal));
+
+        return Ok(await taskConsultaInvestimentoQueNaoEstaBloqueado);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> ListaInvestimentoDaPessoaQueNaoEstaLiquidadoNemBloqueado(ListaInvestimentoQueNaoEstaLiquidadoNemBloqueadoSignature signature)
     {
         var taskListaInvestimentoQueNaoEstaLiquidadoOuBloqueado = _servicoQueConsultaInvestimentoDaPessoa
-            .ListaInvestimentoQueNaoEstaLiquidadoOuBloqueado(new Investimento(signature.Investimento, signature.Investidor, signature.DocumentoFederal));
+            .ListaInvestimentoQueNaoEstaLiquidadoNemBloqueado(new Investimento(signature.Investimento, signature.Investidor, signature.DocumentoFederal));
 
         return Ok(await taskListaInvestimentoQueNaoEstaLiquidadoOuBloqueado);
     }

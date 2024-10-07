@@ -19,10 +19,12 @@ public class Movimentacao
         DtCriacao = DateTime.Now;
     }
 
-    public Movimentacao(Guid idInvestimento, short idMovimentacao, DateTime dtMovimentacao, decimal nmValorBrutoTotal,
+    public Movimentacao(IEnumerable<MovimentacaoImposto> listaDeMovimentacaoImposto, short idMovimentacao, DateTime dtMovimentacao, decimal nmValorBrutoTotal,
         decimal nmValorLiquidoTotal, decimal nmValorBruto, decimal nmValorLiquido)
     {
-        IdInvestimento = idInvestimento;
+        ListaDeMovimentacaoImposto = listaDeMovimentacaoImposto;
+
+        IdInvestimento = listaDeMovimentacaoImposto.First().IdInvestimento;
         IdMovimentacao = idMovimentacao;
         DtMovimentacao = dtMovimentacao;
         NmValorBrutoTotal = nmValorBrutoTotal;
@@ -33,7 +35,7 @@ public class Movimentacao
         ValidaMovimentacao();
     }
 
-    public virtual IEnumerable<MovimentacaoImposto>? ListaDeMovimentacaoImposto { get; } = [];
+    public virtual IEnumerable<MovimentacaoImposto> ListaDeMovimentacaoImposto { get; } = null!;
 
     public Guid IdInvestimento { get; }
     public short IdMovimentacao { get; }
@@ -62,10 +64,23 @@ public class Movimentacao
 
         if (!VerificaSeValorBrutoEhMaiorQueOValorLiquido())
             throw new BadRequestException($"Valor bruto tem que ser maior que o valor líquido! Valor bruto:[{NmValorBruto}] Valor líquido:[{NmValorLiquido}]");
+
+        if (!VerificaSeValoresTotaisSaoMaioresQueOValorImposto())
+            throw new BadRequestException($"Valor bruto total e valor líquido total tem que ser maior que o valor do imposto!");
+
+        if (!VerificaSeValoresTotaisSaoMaioresQueASomaDoValorDeImposto())
+            throw new BadRequestException($"Valor bruto total e valor líquido total que ser maior que o valor da soma dos impostos! Valor bruto:[{NmValorBruto}] Valor líquido:[{NmValorLiquido}] Valor imposto somado:[{ListaDeMovimentacaoImposto.Sum(x => x.NmValorImposto)}]");
     }
 
     private bool VerificaSeValorBrutoEhMaiorQueOValorLiquido() => NmValorBruto > NmValorLiquido;
     private bool VerificaSeValorBrutoTotalEhMaiorQueOValorBruto() => NmValorBrutoTotal > NmValorBruto;
     private bool VerificaSeValorBrutoTotalEhMaiorQueOValorLiquidoTotal() => NmValorBrutoTotal > NmValorLiquidoTotal;
+    private bool VerificaSeValoresTotaisSaoMaioresQueASomaDoValorDeImposto()
+    {
+        var valorImpostoSomado = ListaDeMovimentacaoImposto.Sum(x => x.NmValorImposto);
+        return NmValorBrutoTotal > valorImpostoSomado && NmValorLiquidoTotal > valorImpostoSomado;
+    }
+    private bool VerificaSeValoresTotaisSaoMaioresQueOValorImposto() => ListaDeMovimentacaoImposto.All(x => NmValorLiquidoTotal > x.NmValorImposto && NmValorBrutoTotal > x.NmValorImposto);
     private bool VerificaSeValorLiquidoTotalEhMaiorQueOValorLiquido() => NmValorLiquidoTotal > NmValorLiquido;
+
 }

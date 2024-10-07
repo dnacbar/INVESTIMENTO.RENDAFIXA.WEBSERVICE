@@ -2,5 +2,6 @@
 
 public interface IServicoQueConsultaInvestimentoDaPessoa
 {
-    Task<IEnumerable<Investimento>> ListaInvestimentoQueNaoEstaLiquidadoOuBloqueado(Investimento investimento);
+    Task<Investimento> ConsultaInvestimentoQueNaoEstaBloqueado(Investimento investimento);
+    Task<IEnumerable<Investimento>> ListaInvestimentoQueNaoEstaLiquidadoNemBloqueado(Investimento investimento);
 }
