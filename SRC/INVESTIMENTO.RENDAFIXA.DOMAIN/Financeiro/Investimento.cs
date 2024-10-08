@@ -66,7 +66,16 @@ public class Investimento
         BoLiquidado = boLiquidado;
         BoIsentoImposto = boIsentoImposto;
 
+        Movimentacao = movimentacao;
+
         ValidaInvestimentoMovimentacao();
+    }
+
+    public Investimento(Guid idInvestimento, Guid idInvestidor, string txDocumentoFederal, short idMovimentacao)
+    {
+        Movimentacao = new Movimentacao(idInvestimento, idMovimentacao);
+        IdInvestidor = idInvestidor;
+        TxDocumentoFederal = txDocumentoFederal;
     }
 
     public Investimento(Guid idInvestimento, Guid idInvestidor, string txDocumentoFederal)
@@ -129,7 +138,7 @@ public class Investimento
             throw new BadRequestException($"Código investidor tem que ser preenchido! Código investidor:[{IdInvestidor}]");
 
         if (!VerificaSeDataInvestimentoEstaValida())
-            throw new BadRequestException($"Data inicial tem que ser maior ou igual a data de hoje e menor do que a data final! Data inicial:[{DtFinal}] Data final:[{DtInicial}]");
+            throw new BadRequestException($"Data inicial tem que ser menor ou igual a data de hoje e menor do que a data final! Data inicial:[{DtFinal}] Data final:[{DtInicial}]");
 
         if (!VerificaSeValorInicialFinalEstaPositivo())
             throw new BadRequestException($"Valor inicial ou valor final que ser positivo! Valor inicial:[{NmValorInicial}] Valor final:[{NmValorFinal}]");
@@ -163,7 +172,7 @@ public class Investimento
     private bool VerificaSeCodigoInvestidorEstaPreenchido() => IdInvestidor != Guid.Empty;
     private bool VerificaSeCodigoInvestimentoEstaPreenchido() => IdInvestimento != Guid.Empty;
     private bool VerificaSeDataFinalEhMaiorOuIgualDataMovimentacao() => DtFinal >= Movimentacao.DtMovimentacao;
-    private bool VerificaSeDataInvestimentoEstaValida() => DtInicial >= DateTime.Today && DtInicial < DtFinal;
+    private bool VerificaSeDataInvestimentoEstaValida() => DtInicial <= DateTime.Today && DtInicial < DtFinal;
     private bool VerificaSeDocumentoEstaValido() => ulong.TryParse(TxDocumentoFederal, out _) && TxDocumentoFederal.Length == TamanhoDocumentoPessoaFisica || TxDocumentoFederal.Length == TamanhoDocumentoPessoaJuridica;
     private bool VerificaSeValorFinalEhIgualValorLiquidoTotal() => NmValorFinal == Movimentacao.NmValorLiquidoTotal;
     private bool VerificaSeValorImpostoEstaPositivo() => NmValorImposto >= decimal.Zero;

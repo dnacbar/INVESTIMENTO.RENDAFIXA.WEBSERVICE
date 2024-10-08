@@ -35,6 +35,12 @@ public class Movimentacao
         ValidaMovimentacao();
     }
 
+    public Movimentacao(Guid idInvestimento, short idMovimentacao)
+    {
+        IdInvestimento = idInvestimento;
+        IdMovimentacao = idMovimentacao;
+    }
+
     public virtual IEnumerable<MovimentacaoImposto> ListaDeMovimentacaoImposto { get; } = null!;
 
     public Guid IdInvestimento { get; }

@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using INVESTIMENTO.RENDAFIXA.DOMAIN.Financeiro;
 using INVESTIMENTO.RENDAFIXA.DOMAIN.Financeiro.BancoDados.Consulta;
+using INVESTIMENTO.RENDAFIXA.DOMAIN.Imposto.Enum;
 using System.Data;
 
 namespace INVESTIMENTO.RENDAFIXA.INFRASTRUCTURE.Financeiro.BancoDados.Consulta;
@@ -11,14 +12,36 @@ public class ServicoQueConsultaInvestimentoDaPessoa(IDbConnection dbConnection) 
 
     public Task<Investimento> ConsultaInvestimentoQueNaoEstaBloqueado(Investimento investimento)
     {
-        var listaDeParametro = new
+        var listaDeParametroImposto = new
         {
-            investimento.IdInvestimento,
+            investimento.Movimentacao.IdInvestimento,
+            investimento.Movimentacao.IdMovimentacao
+        };
+
+        var sqlImposto = @"USE DBRENDAFIXA
+
+	                       SELECT MI.[ID_INVESTIMENTO]
+	                             ,MI.[ID_MOVIMENTACAO]
+	                             ,MI.[ID_IMPOSTO]
+	                       	     ,[TX_NOME]
+	                             ,[NM_VALORIMPOSTO]
+	                         FROM [MOVIMENTACAOIMPOSTO] MI
+	                        INNER JOIN [MOVIMENTACAO] M
+	                           ON MI.ID_INVESTIMENTO = M.ID_INVESTIMENTO
+	                          AND MI.ID_MOVIMENTACAO = M.ID_MOVIMENTACAO
+	                        INNER JOIN [IMPOSTO] I
+	                           ON MI.ID_IMPOSTO = I.ID_IMPOSTO
+	                        WHERE MI.ID_INVESTIMENTO = @IdInvestimento
+	                          AND MI.ID_MOVIMENTACAO = @IdMovimentacao";
+
+        var listaDeParametroInvestimento = new
+        {
+            investimento.Movimentacao.IdInvestimento,
             investimento.IdInvestidor,
             investimento.TxDocumentoFederal
         };
 
-        var sql = @"USE [DBRENDAFIXA]
+        var sqlInvestimento = @"USE [DBRENDAFIXA]
 
 	                SELECT I.[ID_INVESTIMENTO]
 	                      ,[ID_INVESTIDOR]
@@ -50,29 +73,47 @@ public class ServicoQueConsultaInvestimentoDaPessoa(IDbConnection dbConnection) 
 
         return Task.Factory.StartNew<Investimento>(() =>
         {
-            using var dReader = _dbConnection.ExecuteReader(sql, listaDeParametro);
+            using var dReaderImposto = _dbConnection.ExecuteReader(sqlImposto, listaDeParametroImposto);
+            
+            var listaMovimentacaoImposto = new List<MovimentacaoImposto>();
+            
+            while (dReaderImposto.Read())
+            {
+                listaMovimentacaoImposto.Add(new MovimentacaoImposto(
+                    Guid.Parse(dReaderImposto["ID_INVESTIMENTO"].ToString()),
+                    Convert.ToInt16(dReaderImposto["ID_MOVIMENTACAO"]),
+                    dReaderImposto["TX_NOME"].ToString(),
+                    (EnumTipoImposto)Convert.ToByte(dReaderImposto["ID_IMPOSTO"]),
+                    Convert.ToDecimal(dReaderImposto["NM_VALORIMPOSTO"])
+                   ));
+            }
+            
+            dReaderImposto.Close();
 
-            if (dReader.Read())
-                return new Investimento(new Movimentacao([],
-                                                        Convert.ToInt16(dReader["ID_MOVIMENTACAO"]),
-                                                        Convert.ToDateTime(dReader["DT_MOVIMENTACAO"]),
-                                                        Convert.ToDecimal(dReader["NM_VALORBRUTOTOTAL"]),
-                                                        Convert.ToDecimal(dReader["NM_VALORLIQUIDOTOTAL"]),
-                                                        Convert.ToDecimal(dReader["NM_VALORBRUTO"]),
-                                                        Convert.ToDecimal(dReader["NM_VALORLIQUIDO"])),
-                    Guid.Parse(dReader["ID_INVESTIDOR"].ToString()),
-                    dReader["TX_DOCUMENTOFEDERAL"].ToString(),
-                    Convert.ToDecimal(dReader["NM_VALORINICIAL"]),
-                    Convert.ToDecimal(dReader["NM_VALORFINAL"]),
-                    Convert.ToDecimal(dReader["NM_VALORIMPOSTO"]),
-                    Convert.ToDecimal(dReader["NM_TAXARENDIMENTO"]),
-                    Convert.ToDecimal(dReader["NM_TAXAADICIONAL"]),
-                    Convert.ToDateTime(dReader["DT_INICIAL"]),
-                    Convert.ToDateTime(dReader["DT_FINAL"]),
-                    Convert.ToByte(dReader["ID_INDEXADOR"]),
-                    Convert.ToBoolean(dReader["BO_LIQUIDADO"]),
-                    Convert.ToBoolean(dReader["BO_ISENTOIMPOSTO"]));
+            using var dReaderInvestimento = _dbConnection.ExecuteReader(sqlInvestimento, listaDeParametroInvestimento);
 
+            if (dReaderInvestimento.Read())
+                return new Investimento(new Movimentacao(listaMovimentacaoImposto,
+                                                        Convert.ToInt16(dReaderInvestimento["ID_MOVIMENTACAO"]),
+                                                        Convert.ToDateTime(dReaderInvestimento["DT_MOVIMENTACAO"]),
+                                                        Convert.ToDecimal(dReaderInvestimento["NM_VALORBRUTOTOTAL"]),
+                                                        Convert.ToDecimal(dReaderInvestimento["NM_VALORLIQUIDOTOTAL"]),
+                                                        Convert.ToDecimal(dReaderInvestimento["NM_VALORBRUTO"]),
+                                                        Convert.ToDecimal(dReaderInvestimento["NM_VALORLIQUIDO"])),
+                    Guid.Parse(dReaderInvestimento["ID_INVESTIDOR"].ToString()),
+                    dReaderInvestimento["TX_DOCUMENTOFEDERAL"].ToString(),
+                    Convert.ToDecimal(dReaderInvestimento["NM_VALORINICIAL"]),
+                    Convert.ToDecimal(dReaderInvestimento["NM_VALORFINAL"]),
+                    Convert.ToDecimal(dReaderInvestimento["NM_VALORIMPOSTO"]),
+                    Convert.ToDecimal(dReaderInvestimento["NM_TAXARENDIMENTO"]),
+                    Convert.ToDecimal(dReaderInvestimento["NM_TAXAADICIONAL"]),
+                    Convert.ToDateTime(dReaderInvestimento["DT_INICIAL"]),
+                    Convert.ToDateTime(dReaderInvestimento["DT_FINAL"]),
+                    Convert.ToByte(dReaderInvestimento["ID_INDEXADOR"]),
+                    Convert.ToBoolean(dReaderInvestimento["BO_LIQUIDADO"]),
+                    Convert.ToBoolean(dReaderInvestimento["BO_ISENTOIMPOSTO"]));
+
+            dReaderInvestimento.Close();
             return null;
         });
     }

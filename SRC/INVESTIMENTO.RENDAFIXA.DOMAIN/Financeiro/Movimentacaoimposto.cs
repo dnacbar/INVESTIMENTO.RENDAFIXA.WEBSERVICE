@@ -5,10 +5,11 @@ namespace INVESTIMENTO.RENDAFIXA.DOMAIN.Financeiro;
 
 public class MovimentacaoImposto
 {
-    public MovimentacaoImposto(Guid idInvestimento, short idMovimentacao, EnumTipoImposto enumTipoImposto, decimal nmValorImposto)
+    public MovimentacaoImposto(Guid idInvestimento, short idMovimentacao, string txNome, EnumTipoImposto enumTipoImposto, decimal nmValorImposto)
     {
         IdInvestimento = idInvestimento;
         IdMovimentacao = idMovimentacao;
+        TxNome = txNome;
         IdImposto = enumTipoImposto;
         NmValorImposto = nmValorImposto;
     }
@@ -25,6 +26,7 @@ public class MovimentacaoImposto
 
     public Guid IdInvestimento { get; }
     public short IdMovimentacao { get; }
+    public string TxNome { get; } = string.Empty;
     public EnumTipoImposto IdImposto { get; }
     public decimal NmValorImposto { get; }
 

@@ -1,4 +1,5 @@
 using INVESTIMENTO.RENDAFIXA.APPLICATION.ConsultaInvestimentoDaPessoa;
+using INVESTIMENTO.RENDAFIXA.APPLICATION.ConsultaInvestimentoDaPessoaQueNaoEstaBloqueado;
 using INVESTIMENTO.RENDAFIXA.DOMAIN.Financeiro;
 using INVESTIMENTO.RENDAFIXA.DOMAIN.Financeiro.BancoDados.Consulta;
 using Microsoft.AspNetCore.Mvc;
@@ -12,10 +13,10 @@ public class ConsultaInvestimentoController(IServicoQueConsultaInvestimentoDaPes
     private readonly IServicoQueConsultaInvestimentoDaPessoa _servicoQueConsultaInvestimentoDaPessoa = servicoQueConsultaInvestimentoDaPessoa;
 
     [HttpPost]
-    public async Task<IActionResult> ConsultaInvestimentoDaPessoaQueNaoEstaBloqueado(ListaInvestimentoQueNaoEstaLiquidadoNemBloqueadoSignature signature)
+    public async Task<IActionResult> ConsultaInvestimentoDaPessoaQueNaoEstaBloqueado(ConsultaInvestimentoQueNaoEstaBloqueado signature)
     {
         var taskConsultaInvestimentoQueNaoEstaBloqueado = _servicoQueConsultaInvestimentoDaPessoa
-            .ConsultaInvestimentoQueNaoEstaBloqueado(new Investimento(signature.Investimento, signature.Investidor, signature.DocumentoFederal));
+            .ConsultaInvestimentoQueNaoEstaBloqueado(new Investimento(signature.Investimento, signature.Investidor, signature.DocumentoFederal, signature.Movimentacao));
 
         return Ok(await taskConsultaInvestimentoQueNaoEstaBloqueado);
     }
